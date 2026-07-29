@@ -1,0 +1,408 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>CR Election</title>
+<link rel="stylesheet" href="style.css">
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
+
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d2e;
+    --surface2: #232741;
+    --accent: #6c63ff;
+    --accent2: #a78bfa;
+    --female: #f472b6;
+    --male: #38bdf8;
+    --text: #e2e8f0;
+    --muted: #94a3b8;
+    --border: #2d3258;
+    --success: #34d399;
+    --radius: 14px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  header {
+    width: 100%;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+
+  .logo {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.2rem;
+    font-weight: 700;
+    background: linear-gradient(135deg, var(--accent2), var(--female));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .header-right {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .user-pill {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    padding: 6px 14px 6px 8px;
+    font-size: 0.85rem;
+  }
+
+  .user-pill img {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+  }
+
+  .hero {
+    padding: 60px 24px 40px;
+    text-align: center;
+    max-width: 700px;
+  }
+
+  .badge {
+    display: inline-block;
+    background: rgba(108,99,255,0.15);
+    border: 1px solid rgba(108,99,255,0.4);
+    color: var(--accent2);
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 5px 14px;
+    border-radius: 999px;
+    margin-bottom: 22px;
+  }
+
+  .hero h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: clamp(2rem, 5vw, 3rem);
+    font-weight: 700;
+    line-height: 1.15;
+    margin-bottom: 16px;
+  }
+
+  .hero h1 span { color: var(--accent2); }
+
+  .hero p {
+    color: var(--muted);
+    font-size: 1rem;
+    line-height: 1.7;
+    margin-bottom: 32px;
+  }
+
+  #signin-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+
+  .signin-btn {
+    background: #4285f4;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 999px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s;
+  }
+
+  .signin-btn:hover { background: #3367d6; }
+
+  .signin-note {
+    font-size: 0.82rem;
+    color: var(--muted);
+  }
+
+  #app {
+    display: none;
+    width: 100%;
+    max-width: 900px;
+    padding: 0 24px 80px;
+  }
+
+  .section-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  .dot-female { background: var(--female); }
+  .dot-male   { background: var(--male); }
+
+  .section-sub {
+    font-size: 0.83rem;
+    color: var(--muted);
+    margin-bottom: 18px;
+    padding-left: 20px;
+  }
+
+  .vote-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 40px;
+  }
+
+  .candidate-card {
+    background: var(--surface);
+    border: 2px solid var(--border);
+    border-radius: var(--radius);
+    padding: 16px 18px;
+    cursor: pointer;
+    transition: all 0.18s ease;
+    position: relative;
+    user-select: none;
+  }
+
+  .candidate-card:hover {
+    border-color: var(--accent);
+    background: var(--surface2);
+    transform: translateY(-2px);
+  }
+
+  .candidate-card.selected-female {
+    border-color: var(--female);
+    background: rgba(244,114,182,0.1);
+  }
+
+  .candidate-card.selected-male {
+    border-color: var(--male);
+    background: rgba(56,189,248,0.1);
+  }
+
+  .candidate-card .check {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 11px;
+    font-weight: 700;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+
+  .candidate-card.selected-female .check { background: var(--female); opacity: 1; color: #000; }
+  .candidate-card.selected-male   .check { background: var(--male);   opacity: 1; color: #000; }
+
+  .candidate-name {
+    font-weight: 600;
+    font-size: 0.92rem;
+    line-height: 1.4;
+  }
+
+  .candidate-id {
+    font-size: 0.75rem;
+    color: var(--muted);
+    margin-top: 4px;
+  }
+
+  .divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 8px 0 36px;
+  }
+
+  .submit-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: rgba(15,17,23,0.9);
+    backdrop-filter: blur(12px);
+    border-top: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    z-index: 200;
+  }
+
+  .vote-summary {
+    display: flex;
+    gap: 20px;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+
+  .vote-summary span { font-weight: 600; }
+  .vote-summary .fem { color: var(--female); }
+  .vote-summary .mal { color: var(--male); }
+
+  .submit-btn {
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 12px 32px;
+    font-size: 0.95rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.15s, transform 0.15s;
+    white-space: nowrap;
+  }
+
+  .submit-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+    transform: none !important;
+  }
+
+  .submit-btn:not(:disabled):hover { transform: translateY(-1px); opacity: 0.92; }
+
+  #success-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(15,17,23,0.95);
+    backdrop-filter: blur(10px);
+    z-index: 999;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    gap: 20px;
+    text-align: center;
+    padding: 32px;
+  }
+
+  .success-icon {
+    width: 72px;
+    height: 72px;
+    background: rgba(52,211,153,0.15);
+    border: 2px solid var(--success);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    margin-bottom: 8px;
+  }
+
+  .success-title {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--success);
+  }
+
+  .success-votes {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 20px 32px;
+    margin-top: 8px;
+    font-size: 0.95rem;
+    line-height: 1.9;
+    text-align: left;
+  }
+
+  .success-votes strong { color: var(--text); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">CR Election</div>
+  <div class="header-right">
+    <div class="user-pill" id="user-pill">
+      <img id="user-avatar" src="" alt=""/>
+      <span id="user-name"></span>
+      <button id="logout-btn" style="background:transparent; border:none; color:var(--muted); cursor:pointer; font-size:0.75rem; margin-left:5px;">Logout</button>
+    </div>
+  </div>
+</header>
+
+<div class="hero">
+  <div class="badge">Upcoming Semester · Class Representative</div>
+  <h1>Vote for Your <span>CR</span></h1>
+  <p>Sign in with your Google account, then choose one female and one male class representative from the list below.</p>
+
+  <div id="signin-section">
+    <button class="signin-btn" id="google-login-btn">
+      <svg width="18" height="18" viewBox="0 0 24 24"><path fill="currentColor" d="M21.35 11.1H12v3.8h5.38c-.25 1.34-1 2.47-2.13 3.23v2.68h3.45c2.02-1.86 3.18-4.6 3.18-8.21c0-.57-.05-1.12-.13-1.5z"/><path fill="currentColor" d="M12 21c2.87 0 5.28-.95 7.04-2.59l-3.45-2.68c-.95.64-2.17 1.02-3.59 1.02c-2.76 0-5.1-1.86-5.93-4.37H2.52v2.75C4.28 18.66 7.88 21 12 21z"/><path fill="currentColor" d="M6.07 12.38c-.21-.64-.33-1.32-.33-2.38s.12-1.74.33-2.38V4.87H2.52C1.78 6.34 1.36 8.09 1.36 10s.42 3.66 1.16 5.13l3.55-2.75z"/><path fill="currentColor" d="M12 5.38c1.56 0 2.96.54 4.06 1.58l3.05-3.05C17.27 2.11 14.86 1.25 12 1.25C7.88 1.25 4.28 3.59 2.52 7.13l3.55 2.75c.83-2.51 3.17-4.5 5.93-4.5z"/></svg>
+      Sign in with Google
+    </button>
+    <p class="signin-note">Your vote is saved securely. You can only vote once per account.</p>
+  </div>
+</div>
+
+<div id="app">
+  <div class="section-title"><span class="dot dot-female"></span> Female CR Candidates</div>
+  <div class="section-sub">Choose 1 female candidate</div>
+  <div class="vote-grid" id="female-grid"></div>
+  <hr class="divider"/>
+
+  <div class="section-title"><span class="dot dot-male"></span> Male CR Candidates</div>
+  <div class="section-sub">Choose 1 male candidate</div>
+  <div class="vote-grid" id="male-grid"></div>
+</div>
+
+<div class="submit-bar" id="submit-bar" style="display:none">
+  <div class="vote-summary">
+    <div>Female CR: <span class="fem" id="sel-female">—</span></div>
+    <div>Male CR: <span class="mal" id="sel-male">—</span></div>
+  </div>
+  <button class="submit-btn" id="submit-btn" disabled>Submit Vote →</button>
+</div>
+
+<div id="success-overlay">
+  <div class="success-icon">✓</div>
+  <div class="success-title">Vote Submitted!</div>
+  <p style="color:var(--muted)">Thank you for participating in the CR election.</p>
+  <div class="success-votes" id="success-detail"></div>
+</div>
+
+<!-- Main Script Module -->
+<script type="module" src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CR Election - Admin Panel</title>
+    <style>
+        body { font-family: sans-serif; background: #0f1117; color: #e2e8f0; padding: 20px; }
+        h1, h2 { color: #a78bfa; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; background: #1a1d2e; }
+        th, td { border: 1px solid #2d3258; padding: 10px; text-align: left; }
+        th { background: #232741; }
+        .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px; }
+        .card { background: #1a1d2e; padding: 15px; border-radius: 8px; border: 1px solid #2d3258; }
+        .card h3 { font-size: 1rem; color: #f472b6; margin-bottom: 5px; }
+        .card.male h3 { color: #38bdf8; }
+    </style>
+</head>
+<body>
+
+    <h1>Live Voting Admin Panel</h1>
+    <a href="index.html" style="color: #6c63ff;">← Back to Voting</a>
+
+    <h2>Female CR Standings</h2>
+    <div id="female-summary" class="grid"></div>
+
+    <h2>Male CR Standings</h2>
+    <div id="male-summary" class="grid"></div>
+
+    <h2>All Submitted Votes</h2>
+    <table>
+        <thead>
+            <tr>
+                <th>Voter Name</th>
+                <th>Voter Email</th>
+                <th>Female Choice</th>
+                <th>Male Choice</th>
+                <th>Time</th>
+            </tr>
+        </thead>
+        <tbody id="voter-list"></tbody>
+    </table>
+
+    <script type="module">
+        import { db, ref, onValue } from "./firebase.js";
+
+        const voteRef = ref(db, 'votes');
+        onValue(voteRef, (snapshot) => {
+            const data = snapshot.val();
+            const femaleGrid = document.getElementById("female-summary");
+            const maleGrid = document.getElementById("male-summary");
+            const tableBody = document.getElementById("voter-list");
+
+            femaleGrid.innerHTML = "";
+            maleGrid.innerHTML = "";
+            tableBody.innerHTML = "";
+
+            if (!data) {
+                tableBody.innerHTML = `<tr><td colspan="5">No votes submitted yet.</td></tr>`;
+                return;
+            }
+
+            const femaleCounts = {};
+            const maleCounts = {};
+
+            Object.values(data).forEach(record => {
+                if(record.female) femaleCounts[record.female.name] = (femaleCounts[record.female.name] || 0) + 1;
+                if(record.male) maleCounts[record.male.name] = (maleCounts[record.male.name] || 0) + 1;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${record.voterName}</td>
+                    <td>${record.voterEmail}</td>
+                    <td>${record.female ? record.female.name : '-'}</td>
+                    <td>${record.male ? record.male.name : '-'}</td>
+                    <td>${new Date(record.timestamp).toLocaleString()}</td>
+                `;
+                tableBody.appendChild(tr);
+            });
+
+            for(const [name, count] of Object.entries(femaleCounts)) {
+                femaleGrid.innerHTML += `<div class="card"><h3>${name}</h3><p><strong>${count}</strong> Votes</p></div>`;
+            }
+            for(const [name, count] of Object.entries(maleCounts)) {
+                maleGrid.innerHTML += `<div class="card male"><h3>${name}</h3><p><strong>${count}</strong> Votes</p></div>`;
+            }
+        });
+    </script>
+</body>
+</html>
