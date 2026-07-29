@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-<title>AIES CR Election</title>
+<title>CR Election</title>
 <script src="https://accounts.google.com/gsi/client" async defer></script>
 <style>
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;700&display=swap');
@@ -355,7 +355,7 @@
 <body>
 
 <header>
-  <div class="logo">AIES · CR Election</div>
+  <div class="logo">CR Election</div>
   <div class="header-right">
     <div class="user-pill" id="user-pill">
       <img id="user-avatar" src="" alt=""/>
@@ -514,7 +514,6 @@ function renderCards(list, containerId, gender) {
       <div class="check">✓</div>
       <div class="candidate-name">${c.name}</div>
       <div class="candidate-id">${c.id}</div>
-      <span class="group-tag group-tag-${gender}">${c.group}</span>
     `;
     card.onclick = () => selectCandidate(card, c, gender);
     grid.appendChild(card);
